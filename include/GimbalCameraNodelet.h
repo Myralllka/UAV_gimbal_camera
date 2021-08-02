@@ -27,17 +27,12 @@ namespace gimbal_camera {
 
     private:
         /* flags */
-        bool is_initialized = false;
         /* ros parameters */
-
-        std::string _uav_name_;
-
         // | --------------------- MRS transformer -------------------- |
-
-        mrs_lib::Transformer transformer_;
 
         // | ---------------------- msg callbacks --------------------- |
 
+        void callback_gimbal_image(const sensor_msgs::ImageConstPtr &msg);
         // | --------------------- timer callbacks -------------------- |
 
         // | --------- variables, related to message checking --------- |
@@ -50,7 +45,6 @@ namespace gimbal_camera {
         // | ----------------------- subscribers ---------------------- |
 
         ros::Subscriber m_sub_gimbal_camera_image;
-
         // | --------------------- other functions -------------------- |
 
     };

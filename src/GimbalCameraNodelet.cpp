@@ -18,20 +18,21 @@ namespace gimbal_camera {
 
         // | ------------------- load ros parameters ------------------ |
         /* (mrs_lib implementation checks whether the parameter was loaded or not) */
-
+        m_sub_gimbal_camera_image = nh.subscribe("", 1, &GimbalCameraNodelet::callback_gimbal_image, this);
 
         // | --------------------- tf transformer --------------------- |
 
         // | -------------------- initialize timers ------------------- |
 
         ROS_INFO_ONCE("[GimbalCameraNodelet]: initialized");
-
-        is_initialized = true;
     }
 //}
 
 // | ---------------------- msg callbacks --------------------- |
 
+    void GimbalCameraNodelet::callback_gimbal_image(const sensor_msgs::ImageConstPtr &msg) {
+
+    }
 
 // | --------------------- timer callbacks -------------------- |
 
