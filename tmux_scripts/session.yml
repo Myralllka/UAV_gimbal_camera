@@ -1,0 +1,28 @@
+name: simulation
+root: ./
+startup_window: status
+windows:
+  - roscore:
+      layout: tiled
+      panes:
+        - roscore
+  - gimbal:
+      layout: tiled
+      panes:
+        - waitForRos; roslaunch mrs_serial gimbal.launch
+  - camera_node:
+      layout: tiled
+      panes:
+        - waitForRos; rosrun spinnaker_camera_driver camera_node
+  - images:
+      layout: tiled
+      panes: 
+        - waitForRos; rosrun rqt_image_view rqt_image_view
+  - rviz:
+      layout: tiled
+      panes:
+        - waitForRos; rviz -d $(rospack find mrs_serial)/rviz/gimbal.rviz
+  - dyn_par:
+      layout: tiled
+      panes: 
+        - waitForRos; rosrun rqt_reconfigure rqt_reconfigure
