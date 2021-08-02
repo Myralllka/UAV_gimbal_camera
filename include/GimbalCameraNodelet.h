@@ -45,7 +45,11 @@ namespace gimbal_camera {
 
         // | ----------------------- publishers ----------------------- |
 
-        ros::Publisher pub_example;
+        ros::Publisher m_pub_im2apriltag;
+
+        // | ----------------------- subscribers ---------------------- |
+
+        ros::Subscriber m_sub_gimbal_camera_image;
 
         // | --------------------- other functions -------------------- |
 

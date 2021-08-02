@@ -9,8 +9,6 @@ namespace gimbal_camera {
     void GimbalCameraNodelet::onInit() {
 
         // | ---------------- set my booleans to false ---------------- |
-        // but remember, always set them to their default value in the header file
-        // because, when you add new one later, you might forger to come back here
 
         /* obtain node handle */
         ros::NodeHandle nh = nodelet::Nodelet::getMTPrivateNodeHandle();
@@ -21,18 +19,8 @@ namespace gimbal_camera {
         // | ------------------- load ros parameters ------------------ |
         /* (mrs_lib implementation checks whether the parameter was loaded or not) */
 
-        mrs_lib::ParamLoader param_loader(nh, "GimbalCameraNodelet");
-
-        param_loader.loadParam("UAV_NAME", _uav_name_);
-
-        if (!param_loader.loadedSuccessfully()) {
-            ROS_ERROR("[GimbalCameraNodelet]: failed to load non-optional parameters!");
-            ros::shutdown();
-        }
 
         // | --------------------- tf transformer --------------------- |
-
-        transformer_ = mrs_lib::Transformer("GimbalCameraNodelet", _uav_name_);
 
         // | -------------------- initialize timers ------------------- |
 

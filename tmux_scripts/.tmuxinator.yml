@@ -26,3 +26,7 @@ windows:
       layout: tiled
       panes: 
         - waitForRos; rosrun rqt_reconfigure rqt_reconfigure
+  - apriltag_detection:
+      layout: tiled
+      panes:
+        - waitForRos; roslaunch apriltags2_ros continuous_detection.launch
