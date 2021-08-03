@@ -26,8 +26,8 @@
     <group ns="$(arg UAV_NAME)">
 
         <!-- ClASS_NAME nodelet -->
-        <node pkg="nodelet" type="nodelet" name="gimbal_camera"
-              args="$(arg nodelet) gimbal_camera/GimbalCameraNodelet $(arg nodelet_manager)"
+        <node pkg="nodelet" type="nodelet" name="mrs_gimbal_camera"
+              args="$(arg nodelet) mrs_gimbal_camera/GimbalCameraNodelet $(arg nodelet_manager)"
               launch-prefix="$(arg launch_prefix_debug)" output="screen">
 
             <!-- Parameters loaded from launch file -->

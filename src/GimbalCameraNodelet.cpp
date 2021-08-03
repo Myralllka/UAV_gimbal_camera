@@ -30,7 +30,7 @@ namespace gimbal_camera {
 
 // | ---------------------- msg callbacks --------------------- |
 
-    void GimbalCameraNodelet::callback_gimbal_image(const sensor_msgs::ImageConstPtr &msg) {
+    void GimbalCameraNodelet::callback_gimbal_image([[maybe_unused]]const sensor_msgs::ImageConstPtr &msg) {
 
     }
 

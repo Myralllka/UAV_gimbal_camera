@@ -10,6 +10,7 @@ add_compile_options(-Wall -Wextra -pedantic -Werror -Werror=vla)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  nodelet
   std_msgs
   mrs_lib
   
