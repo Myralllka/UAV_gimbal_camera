@@ -14,19 +14,11 @@ windows:
       layout: tiled
       panes:
         - waitForRos; rosrun spinnaker_camera_driver camera_node
-  - images:
-      layout: tiled
-      panes: 
-        - waitForRos; rosrun rqt_image_view rqt_image_view
   - rviz:
       layout: tiled
       panes:
         - waitForRos; rviz -d $(rospack find mrs_serial)/rviz/gimbal.rviz
-  - dyn_par:
-      layout: tiled
-      panes: 
-        - waitForRos; rosrun rqt_reconfigure rqt_reconfigure
   - apriltag_detection:
       layout: tiled
       panes:
-        - waitForRos; roslaunch apriltags_ros continuous_detection.launch
+        - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera.launch

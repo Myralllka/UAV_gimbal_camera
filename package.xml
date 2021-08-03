@@ -18,6 +18,8 @@
   <depend>mrs_lib</depend>
   <depend>cv_bridge</depend>
   <depend>pluginlib</depend>
+  <depend>apriltag_ros</depend> <!-- https://github.com/AprilRobotics/apriltag_ros -->>
+  <depend>spinnaker_camera_driver</depend> <!-- https://github.com/ros-drivers/flir_camera_driver -->>
 
   <export>
     <!-- The plugins.xml file defines nodelet as a plugin -->
