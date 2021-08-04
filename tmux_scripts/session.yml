@@ -10,10 +10,6 @@ windows:
       layout: tiled
       panes:
         - waitForRos; roslaunch mrs_serial gimbal.launch
-  - camera_node:
-      layout: tiled
-      panes:
-        - waitForRos; rosrun spinnaker_camera_driver camera_node
   - rviz:
       layout: tiled
       panes:

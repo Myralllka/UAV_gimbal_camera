@@ -23,12 +23,12 @@
     <arg unless="$(arg standalone)" name="nodelet_manager" value="$(arg manager)"/>
 
     <include file="$(find apriltag_ros)/launch/continuous_detection.launch"/>
-    <node pkg="spinnaker_camera_driver" type="camera_node" name="cam_driver"/>
+    <include file="$(find spinnaker_camera_driver)/launch/camera.launch"/>
 
-    <node pkg="topic_tools" type="relay" args="/image_raw /camera_rect/image_rect" name="raw2rect"/>
-    <node pkg="topic_tools" type="relay" args="/camera_info /camera_rect/camera_info" name="in2in"/>
-    <node pkg="rqt_image_view" type="rqt_image_view" name="image_view_debug" args="/tag_detections_image"/>
+    <node pkg="topic_tools" type="relay" args="/camera/image_raw /camera_rect/image_rect" name="raw2rect"/>
+    <node pkg="topic_tools" type="relay" args="/camera/camera_info /camera_rect/camera_info" name="in2in"/>
     <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="reconf_debug" />
+    <node pkg="rqt_image_view" type="rqt_image_view" name="image_view_debug" args="/tag_detections_image"/>
 
     <!-- Namespace - all topics and parameters will be remapped using this namespace as a prefix (eg.: "/vision_example/image_in" to "/uav1/vision_example/image_in") -->
     <group ns="$(arg UAV_NAME)">
@@ -55,7 +55,8 @@
 
     </group>
 
-    <node pkg="tf2_ros" type="static_transform_publisher" name="april2cam" args="0 0 0 0.5 -0.5 0.5 -0.5 camera_global camera" />
-    <node pkg="tf2_ros" type="static_transform_publisher" name="gimba2cam" args="0 0 0 0 0 0 1 camera_global uav1/gimbal/base_link" />
+    <!--<node pkg="tf2_ros" type="static_transform_publisher" name="april2cam" args="0 0 0 0.5 -0.5 0.5 -0.5 camera_global camera" />-->
+    <!--<node pkg="tf2_ros" type="static_transform_publisher" name="gimba2cam" args="0 0 0 0 0 0 1 camera_global uav1/gimbal/base_link" />-->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="gimba2cam" args="0 0 0 0 0 0 1 uav1/gimbal/camera_optical camera" />
 
 </launch>
