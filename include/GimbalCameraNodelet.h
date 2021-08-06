@@ -22,6 +22,9 @@
 template<typename T>
 T deg2rad(const T x) { return x * M_PI / 180; }
 
+template<typename T>
+T rad2deg(const T x) { return x / M_PI * 180; }
+
 //}
 
 namespace gimbal_camera {
@@ -31,13 +34,15 @@ namespace gimbal_camera {
 
     public:
         /* onInit() is called when nodelet is launched (similar to main() in regular node) */
-        virtual void onInit();
+        [[noreturn]] virtual void onInit();
 
     private:
         /* flags */
         bool m_recv_camera_info = false;
         /* ros parameters */
         sensor_msgs::CameraInfo m_camera_info;
+        float m_x_movement{0.0};
+        float m_y_movement{0.0};
         // | --------------------- MRS transformer -------------------- |
         mrs_lib::Transformer m_transformer;
         // | ---------------------- msg callbacks --------------------- |
@@ -58,7 +63,9 @@ namespace gimbal_camera {
 //        ros::Subscriber m_sub_gimbal_;
         // | --------------------- other functions -------------------- |
 
-        void follow_apriltag();
+        void follow_apriltag_using_z_coordinate();
+
+        void follow_apriltag_steps();
 
     };
 //}

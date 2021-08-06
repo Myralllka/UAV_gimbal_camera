@@ -13,8 +13,12 @@ windows:
   - rviz:
       layout: tiled
       panes:
-        - waitForRos; rviz -d $(rospack find mrs_serial)/rviz/gimbal.rviz
+        - waitForRos; rviz -d $(rospack find mrs_gimbal_camera)/rviz/gimbal.rviz
   - apriltag_detection:
       layout: tiled
       panes:
-        - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera.launch
+        - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera.launch | grep GimbalCamera
+  - messages:
+      layout: tiled
+      panes:
+        - waitForRos; rostopic echo /uav1/gimbal_driver/cmd_pry

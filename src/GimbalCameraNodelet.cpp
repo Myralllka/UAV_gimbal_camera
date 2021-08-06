@@ -5,7 +5,7 @@
 namespace gimbal_camera {
 
 /* onInit() method //{ */
-    void GimbalCameraNodelet::onInit() {
+    [[noreturn]] void GimbalCameraNodelet::onInit() {
 
         // | ---------------- set my booleans to false ---------------- |
 
@@ -29,7 +29,7 @@ namespace gimbal_camera {
 
         ROS_INFO_ONCE("[GimbalCameraNodelet]: initialized");
         while (true) {
-            follow_apriltag();
+            follow_apriltag_steps();
         }
     }
 //}
@@ -46,43 +46,50 @@ namespace gimbal_camera {
 
 // | -------------------- other functions ------------------- |
 
-    void GimbalCameraNodelet::follow_apriltag() {
-        if (not m_recv_camera_info) return;
+    void GimbalCameraNodelet::follow_apriltag_steps() {
 
-        const auto tf_tag_cam = m_transformer.getTransform("mbundle", "camera");
-        if (!tf_tag_cam.has_value()) {
+    };
+
+    void GimbalCameraNodelet::follow_apriltag_using_z_coordinate() {
+        if (not m_recv_camera_info) return;
+        const auto tf_tag_cam = m_transformer.getTransform("camera", "mbundle", ros::Time::now());
+        //ROS_ERROR_STREAM_THROTTLE(1.0, "[GimbalCameraNodelet]: stamp sec: " << tf_tag_cam->stamp().sec << "; now: "<< ros::Time::now().sec<< "; duration: " << ros::Time::now().sec - tf_tag_cam->stamp().sec);
+
+        if (!tf_tag_cam.has_value() or (ros::Time::now().sec - tf_tag_cam->stamp().sec > 1)) {
             ROS_ERROR_THROTTLE(1.0,
                                "[GimbalCameraNodelet]: Could not transform commanded orientation from frame mbundle to camera, ignoring.");
             return;
         }
+
         ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: start following april tag");
-        const float horizontal_pixels_per_angle = m_camera_info.K[2] / m_camera_info.K[0];
-        const float vertical_pixels_per_angle = m_camera_info.K[5] / m_camera_info.K[4];
 
-        //std::cout << horizontal_pixels_per_angle << std::endl;
-        //std::cout << vertical_pixels_per_angle << std::endl;
+        const auto translation = tf_tag_cam->getTransform().transform.translation;
 
-        auto msg_pry = boost::make_shared<mrs_msgs::GimbalPRY>();
+        const auto x_error = static_cast<float>(translation.x);
+        const auto y_error = static_cast<float>(translation.y);
 
-        float x_error = static_cast<float>(tf_tag_cam->getTransform().transform.translation.x);
-        float y_error = static_cast<float>(tf_tag_cam->getTransform().transform.translation.y);
         ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: %f - x_error, %f - y_error", x_error, y_error);
-        ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: %f - ver    , %f - hor    ", vertical_pixels_per_angle, horizontal_pixels_per_angle);
 
+        const bool x_change_flag = std::abs(x_error) > 0.01;
+        const bool y_change_flag = std::abs(y_error) > 2;
 
-        bool x_change = std::abs(x_error) > 0.1;
-        bool y_change = std::abs(y_error) > 0.1;
+        const auto yaw_angle_rotation = static_cast<float>(atan2(translation.x, translation.z));
+        //const auto pitch_angle_rotation = static_cast<float>(atan2(translation.y, translation.z));
 
-        msg_pry->yaw = x_change
-                       ? - deg2rad(x_error /  0.24) : 0;
-        msg_pry->pitch = y_change
-                         ? deg2rad(y_error / 0.24) : 0;
-        msg_pry->roll = 0;
-        if (x_change or y_change) {
+        if (x_change_flag or y_change_flag) {
+            auto msg_pry = boost::make_shared<mrs_msgs::GimbalPRY>();
+            msg_pry->roll = 0;
+            msg_pry->yaw = yaw_angle_rotation;
+            msg_pry->pitch = 0;
+//            msg_pry->pitch = std::copysign(y_error, pitch_angle_rotation);
             m_pub_transform2gimbal.publish(msg_pry);
-            ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: msg sended");
+
+            std::cout << "[GimbalCamera]: rotate on deg: " << rad2deg(msg_pry->yaw) << std::endl;
+
+            ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: msg sent");
+            //ros::Duration(0.1).sleep();
         } else {
-            ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: no changes - msg is not sended");
+            ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: no changes - msg is not sent");
         }
     }
 
