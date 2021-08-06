@@ -18,7 +18,7 @@ windows:
       layout: tiled
       panes:
         - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera.launch | grep GimbalCamera
-  - messages:
-      layout: tiled
-      panes:
-        - waitForRos; rostopic echo /uav1/gimbal_driver/cmd_pry
+  #- messages:
+  #    layout: tiled
+  #    panes:
+  #      - waitForRos; rostopic echo /uav1/gimbal_driver/cmd_pry
