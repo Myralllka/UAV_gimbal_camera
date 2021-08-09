@@ -74,19 +74,18 @@ namespace gimbal_camera {
 
         ROS_INFO("[GimbalCamera]: %f - x_movement, %f - y_movement", rad2deg(m_yaw_movement),
                           rad2deg(m_pitch_movement));
+        if (x_change_flag and std::abs(m_yaw_movement) < m_max_angle ) {
+            x_error < 0 ? (m_yaw_movement += m_step) : (m_yaw_movement -= m_step);
+        }
+        if (y_change_flag and std::abs(m_pitch_movement) < m_max_angle) {
+            y_error < 0 ? (m_pitch_movement -= m_step) : (m_pitch_movement += m_step);
+        }
         if (x_change_flag or y_change_flag) {
-            if (std::abs(m_yaw_movement) < m_max_angle)
-                x_error < 0 ? (m_yaw_movement += m_step) : (m_yaw_movement -= m_step);
-            if (std::abs(m_pitch_movement) < m_max_angle)
-                y_error < 0 ? (m_pitch_movement -= m_step) : (m_pitch_movement += m_step);
-
             auto msg_pry = boost::make_shared<mrs_msgs::GimbalPRY>();
             msg_pry->roll = 0;
             msg_pry->yaw = m_yaw_movement;
             msg_pry->pitch = m_pitch_movement;
-
             m_pub_transform2gimbal.publish(msg_pry);
-
             std::cout << "[GimbalCamera]: rotate on deg: " << rad2deg(msg_pry->yaw) << std::endl;
 
             //ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: msg sent");
