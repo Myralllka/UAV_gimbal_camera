@@ -21,18 +21,18 @@ namespace gimbal_camera {
         m_transformer = mrs_lib::Transformer("gimbal_camera");
         // | -------------------- initialize timers ------------------- |
 
-        m_timer_following = nh.createTimer(ros::Duration(0.04), &GimbalCameraNodelet::follow_apriltag_incremental,
+        m_timer_following = nh.createTimer(ros::Duration(0.03), &GimbalCameraNodelet::follow_apriltag_incremental,
                                            this);
 
         m_timer_centering = nh.createTimer(ros::Duration(m_time_before_centering), &GimbalCameraNodelet::center_camera,
                                            this);
 
-        m_pub_transform2gimbal = nh.advertise<mrs_msgs::GimbalPRY>("/uav1/gimbal_driver/cmd_pry", 2);
+        m_pub_transform2gimbal = nh.advertise<mrs_msgs::GimbalPRY>("/uav1/gimbal_driver/cmd_pry", 8);
 
-        m_sub_gimbal_camera_info = nh.subscribe("/camera/camera_info", 2,
+        m_sub_gimbal_camera_info = nh.subscribe("/camera/camera_info", 8,
                                                 &GimbalCameraNodelet::callback_camera_info,
                                                 this);
-
+        m_sub_rosout = nh.subscribe("/rosout", 2, &GimbalCameraNodelet::callback_missing_images, this);
         ROS_INFO_ONCE("[GimbalCameraNodelet]: initialized");
     }
 //}
@@ -45,9 +45,15 @@ namespace gimbal_camera {
             m_recv_camera_info = true;
         }
     }
+
+    void GimbalCameraNodelet::callback_missing_images(const rosgraph_msgs::Log::ConstPtr &msg) {
+        if (msg->name != "/camera/camera_nodelet_manager") return;
+        if (msg->msg.find("Image received from camera") != std::string::npos) {
+            m_missed_images += 1;
+        }
+    }
 // | --------------------- timer callbacks -------------------- |
 
-// | -------------------- other functions ------------------- |
 
     [[maybe_unused]] void GimbalCameraNodelet::follow_apriltag_PID([[maybe_unused]] const ros::TimerEvent &ev) {
         if (not m_recv_camera_info) return;
@@ -58,7 +64,6 @@ namespace gimbal_camera {
 
     }
 
-
     [[maybe_unused]] void GimbalCameraNodelet::follow_apriltag_incremental([[maybe_unused]] const ros::TimerEvent &ev) {
         if (not m_recv_camera_info) return;
         const auto tf_tag_cam = m_transformer.getTransform("mbundle", "camera", ros::Time::now());
@@ -67,7 +72,7 @@ namespace gimbal_camera {
             return;
         }
 
-        ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: start following april tag");
+        ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: Incremental apriltag following");
 
         const auto translation = tf_tag_cam->getTransform().transform.translation;
 
@@ -77,7 +82,7 @@ namespace gimbal_camera {
         const bool x_change_flag = std::abs(x_error) > m_max_x_error;
         const bool y_change_flag = std::abs(y_error) > m_max_y_error;
 
-
+        const std::lock_guard<std::mutex> lock(m_movement_mutex);
         if (x_change_flag) {
             const auto step = calculate_step(x_error, m_max_x_error);
             if (x_error < 0) {
@@ -103,9 +108,9 @@ namespace gimbal_camera {
             m_pub_transform2gimbal.publish(msg_pry);
 
             ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: msg sent");
-            ROS_INFO("[GimbalCamera]: %f - x_movement deg, %f - y_movement deg", rad2deg(m_yaw_movement),
-                     rad2deg(m_pitch_movement));
-            ROS_INFO("[GimbalCamera]: %f - x_err, %f - y_err", x_error, y_error);
+            //ROS_INFO("[GimbalCamera]: %f - x_movement deg, %f - y_movement deg", rad2deg(m_yaw_movement),
+            //         rad2deg(m_pitch_movement));
+            //ROS_INFO("[GimbalCamera]: %f - x_err, %f - y_err", x_error, y_error);
         } else {
             ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: no changes - msg is not sent");
         }
@@ -154,7 +159,7 @@ namespace gimbal_camera {
         if (not m_recv_camera_info) return;
 
         const auto tf_tag_cam = m_transformer.getTransform("mbundle", "camera", ros::Time::now());
-
+        const std::lock_guard<std::mutex> lock(m_movement_mutex);
         if (!tf_tag_cam.has_value() or (ros::Time::now().sec - tf_tag_cam->stamp().sec > m_time_before_centering)) {
             ROS_ERROR(
                     "[GimbalCameraNodelet]: Could not transform commanded orientation from frame mbundle to camera, ignoring.");
@@ -168,6 +173,7 @@ namespace gimbal_camera {
         }
     }
 
+    // | -------------------- other functions ------------------- |
 
 }  // namespace gimbal_camera
 

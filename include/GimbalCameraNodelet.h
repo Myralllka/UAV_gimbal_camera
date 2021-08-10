@@ -6,6 +6,7 @@
 #include <ros/package.h>
 #include <nodelet/nodelet.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <rosgraph_msgs/Log.h>
 
 /* some STL includes */
 #include <cstdlib>
@@ -52,11 +53,16 @@ namespace gimbal_camera {
         const float m_max_y_error{0.01};
         ros::Timer m_timer_following;
         ros::Timer m_timer_centering;
+
+        size_t m_missed_images = 0;
+        std::mutex m_movement_mutex;
         // | --------------------- MRS transformer -------------------- |
         mrs_lib::Transformer m_transformer;
         // | ---------------------- msg callbacks --------------------- |
 
         void callback_camera_info(const sensor_msgs::CameraInfo::ConstPtr &msg);
+
+        void callback_missing_images(const rosgraph_msgs::Log::ConstPtr &msg);
         // | --------------------- timer callbacks -------------------- |
 
         // | --------- variables, related to message checking --------- |
@@ -69,6 +75,7 @@ namespace gimbal_camera {
         // | ----------------------- subscribers ---------------------- |
 
         ros::Subscriber m_sub_gimbal_camera_info;
+        ros::Subscriber m_sub_rosout;
 //        ros::Subscriber m_sub_gimbal_;
         // | --------------------- other functions -------------------- |
 
@@ -80,7 +87,7 @@ namespace gimbal_camera {
 
         void center_camera(const ros::TimerEvent &ev);
 
-        [[maybe_unused]]inline float calculate_step(const float current_error, const float max_error) const {
+        [[maybe_unused]] inline float calculate_step(const float current_error, const float max_error) const {
             float step = std::abs(current_error) / max_error * m_step;
             return step;
         }

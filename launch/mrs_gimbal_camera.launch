@@ -22,13 +22,6 @@
     <arg if="$(arg standalone)" name="nodelet_manager" value=""/>
     <arg unless="$(arg standalone)" name="nodelet_manager" value="$(arg manager)"/>
 
-    <include file="$(find apriltag_ros)/launch/continuous_detection.launch"/>
-    <include file="$(find spinnaker_camera_driver)/launch/camera.launch"/>
-
-    <node pkg="topic_tools" type="relay" args="/camera/image_color /camera_rect/image_rect" name="raw2rect" output="log"/>
-    <node pkg="topic_tools" type="relay" args="/camera/camera_info /camera_rect/camera_info" name="in2in" output="log"/>
-    <node pkg="rqt_gui" type="rqt_gui" name="reconf_debug" />
-
     <!-- Namespace - all topics and parameters will be remapped using this namespace as a prefix (eg.: "/vision_example/image_in" to "/uav1/vision_example/image_in") -->
     <group ns="$(arg UAV_NAME)">
 

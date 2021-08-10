@@ -10,6 +10,10 @@ windows:
       layout: tiled
       panes:
         - waitForRos; roslaunch mrs_serial gimbal.launch
+  - additional:
+      layout: tiled
+      panes:
+        - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera_topictools.launch
   - rviz:
       layout: tiled
       panes:
@@ -18,7 +22,4 @@ windows:
       layout: tiled
       panes:
         - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera.launch
-  #- messages:
-  #    layout: tiled
-  #    panes:
-  #      - waitForRos; rostopic echo /uav1/gimbal_driver/cmd_pry
+        - waitForRos; rostopic hz /tag_detections_image
