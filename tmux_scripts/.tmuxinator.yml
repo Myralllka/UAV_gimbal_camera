@@ -17,7 +17,7 @@ windows:
   - apriltag_detection:
       layout: tiled
       panes:
-        - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera.launch | grep GimbalCamera
+        - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera.launch
   #- messages:
   #    layout: tiled
   #    panes:

@@ -41,11 +41,17 @@ namespace gimbal_camera {
         bool m_recv_camera_info = false;
         /* ros parameters */
         sensor_msgs::CameraInfo m_camera_info;
+
         float m_yaw_movement{0.0};
         float m_pitch_movement{0.0};
         const float m_step{0.001};
-        const float m_max_angle{0.3};
-        ros::Timer m_timer;
+        const float m_max_angle{0.28};
+        const float m_time_before_centering{1};
+
+        const float m_max_x_error{0.01};
+        const float m_max_y_error{0.01};
+        ros::Timer m_timer_following;
+        ros::Timer m_timer_centering;
         // | --------------------- MRS transformer -------------------- |
         mrs_lib::Transformer m_transformer;
         // | ---------------------- msg callbacks --------------------- |
@@ -66,10 +72,18 @@ namespace gimbal_camera {
 //        ros::Subscriber m_sub_gimbal_;
         // | --------------------- other functions -------------------- |
 
-        void follow_apriltag_using_z_coordinate();
+        void follow_apriltag_using_z_coordinate(const ros::TimerEvent &ev);
 
-        void follow_apriltag_steps(const ros::TimerEvent &ev);
+        void follow_apriltag_incremental(const ros::TimerEvent &ev);
 
+        void follow_apriltag_PID(const ros::TimerEvent &ev);
+
+        void center_camera(const ros::TimerEvent &ev);
+
+        [[maybe_unused]]inline float calculate_step(const float current_error, const float max_error) const {
+            float step = std::abs(current_error) / max_error * m_step;
+            return step;
+        }
     };
 //}
 
