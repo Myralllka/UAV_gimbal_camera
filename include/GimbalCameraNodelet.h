@@ -16,11 +16,14 @@
 #include <mrs_lib/param_loader.h>
 #include <mrs_lib/transformer.h>
 #include <mrs_msgs/GimbalPRY.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 #include <tf2_ros/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 
 #include <pluginlib/class_list_macros.h>
+
+#include <apriltag_ros/AprilTagDetectionArray.h>
 
 template<typename T>
 T deg2rad(const T x) { return x * M_PI / 180; }
@@ -53,7 +56,6 @@ namespace gimbal_camera {
 
         const float m_max_x_error{0.005};
         const float m_max_y_error{0.005};
-        ros::Timer m_timer_following;
         ros::Timer m_timer_centering;
 
         std::mutex m_movement_mutex;
@@ -62,22 +64,23 @@ namespace gimbal_camera {
 
         // | ---------------------- msg callbacks --------------------- |
 
-        void callback_camera_info(const sensor_msgs::CameraInfo::ConstPtr &msg);
+        void m_cbk_camera_info(const sensor_msgs::CameraInfo::ConstPtr &msg);
 
+        void m_cbk_tag_detection(const apriltag_ros::AprilTagDetectionArray msg);
         // | --------------------- timer callbacks -------------------- |
 
         // | --------- variables, related to message checking --------- |
 
 
         // | ----------------------- publishers ----------------------- |
-        tf2_ros::TransformBroadcaster m_pub_transform;
 
         ros::Publisher m_pub_transform2gimbal_pry;
         ros::Publisher m_pub_transform2gimbal_quat;
 
         // | ----------------------- subscribers ---------------------- |
 
-        ros::Subscriber m_sub_gimbal_camera_info;
+        ros::Subscriber m_sub_camera_info;
+        ros::Subscriber m_sub_tag_detection;
 //        ros::Subscriber m_sub_gimbal_;
         // | --------------------- other functions -------------------- |
 

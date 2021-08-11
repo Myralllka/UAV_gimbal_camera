@@ -31,30 +31,66 @@ namespace gimbal_camera {
 
         m_pub_transform2gimbal_pry = nh.advertise<mrs_msgs::GimbalPRY>("/uav1/gimbal_driver/cmd_pry", 1);
 
-        m_pub_transform2gimbal_quat = nh.advertise<geometry_msgs::QuaternionStamped>("/uav1/gimbal_driver/cmd_orientation", 1);
+        m_pub_transform2gimbal_quat = nh.advertise<geometry_msgs::QuaternionStamped>(
+                "/uav1/gimbal_driver/cmd_orientation", 1);
 
-        m_sub_gimbal_camera_info = nh.subscribe("/camera/camera_info", 8,
-                                                &GimbalCameraNodelet::callback_camera_info,
-                                                this);
+        m_sub_tag_detection = nh.subscribe("/tag_detections", 8,
+                                           &GimbalCameraNodelet::m_cbk_tag_detection,
+                                           this);
+
+        m_sub_camera_info = nh.subscribe("/camera/camera_info", 8,
+                                         &GimbalCameraNodelet::m_cbk_camera_info,
+                                         this);
         ROS_INFO_ONCE("[GimbalCameraNodelet]: initialized");
 
-        while (true) {
-            follow_apriltag_from_two_vectors();
-        }
     }
 //}
 
 // | ---------------------- msg callbacks --------------------- |
 
-    void GimbalCameraNodelet::callback_camera_info(const sensor_msgs::CameraInfo::ConstPtr &msg) {
+    void GimbalCameraNodelet::m_cbk_camera_info(const sensor_msgs::CameraInfo::ConstPtr &msg) {
         if (not m_recv_camera_info) {
             m_camera_info = *msg;
             m_recv_camera_info = true;
         } else {
-            m_sub_gimbal_camera_info.shutdown();
+            m_sub_camera_info.shutdown();
         }
     }
 
+    void GimbalCameraNodelet::m_cbk_tag_detection(const apriltag_ros::AprilTagDetectionArray msg) {
+        std::vector<int> a;
+        if (msg.detections.size() == 0) {
+            return;
+        }
+        auto detection = msg.detections.back();
+
+        const auto vec2apriltag = Eigen::Vector3d{detection.pose.pose.pose.position.x,
+                                                  detection.pose.pose.pose.position.y,
+                                                  detection.pose.pose.pose.position.z};
+
+        Eigen::Quaterniond orientation = Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d::UnitX(), vec2apriltag);
+
+        const auto x_error = static_cast<float>(detection.pose.pose.pose.position.x);
+        const auto y_error = static_cast<float>(detection.pose.pose.pose.position.y);
+
+        const bool x_change_flag = std::abs(x_error) > m_max_x_error;
+        const bool y_change_flag = std::abs(y_error) > m_max_y_error;
+
+        if (x_change_flag or y_change_flag) {
+            auto msg_quat = boost::make_shared<geometry_msgs::QuaternionStamped>();
+            msg_quat->header.stamp = ros::Time::now();
+            msg_quat->header.frame_id = "uav1/gimbal/camera_optical";
+            msg_quat->quaternion.x = orientation.x();
+            msg_quat->quaternion.y = orientation.y();
+            msg_quat->quaternion.z = orientation.z();
+            msg_quat->quaternion.w = orientation.w();
+            m_pub_transform2gimbal_quat.publish(msg_quat);
+            ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: msg sent");
+        } else {
+            ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: no changes - msg is not sent");
+        }
+
+    }
 // | --------------------- timer callbacks -------------------- |
 
 
@@ -80,13 +116,13 @@ namespace gimbal_camera {
         const bool y_change_flag = std::abs(y_error) > m_max_y_error;
 
         if (x_change_flag or y_change_flag) {
-            geometry_msgs::QuaternionStamped msg_quat{};
-            msg_quat.header.stamp = ros::Time::now();
-            msg_quat.header.frame_id = "uav1/gimbal/camera_optical";
-            msg_quat.quaternion.x = orientation.x();
-            msg_quat.quaternion.y = orientation.y();
-            msg_quat.quaternion.z = orientation.z();
-            msg_quat.quaternion.w = orientation.w();
+            auto msg_quat = boost::make_shared<geometry_msgs::QuaternionStamped>();
+            msg_quat->header.stamp = ros::Time::now();
+            msg_quat->header.frame_id = "uav1/gimbal/camera_optical";
+            msg_quat->quaternion.x = orientation.x();
+            msg_quat->quaternion.y = orientation.y();
+            msg_quat->quaternion.z = orientation.z();
+            msg_quat->quaternion.w = orientation.w();
             m_pub_transform2gimbal_quat.publish(msg_quat);
             ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: msg sent");
         } else {

@@ -5,6 +5,7 @@ set(FILESNAME GimbalCameraNodelet)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(apriltag_DIR /home/mrs/april_tag_workspace)
 
 add_compile_options(-Wall -Wextra -pedantic -Werror -Werror=vla)
 
@@ -13,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
         nodelet
         std_msgs
         mrs_lib
-
+        apriltag_ros
         )
 
 find_package(OpenCV REQUIRED)
