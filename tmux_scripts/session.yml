@@ -22,4 +22,3 @@ windows:
       layout: tiled
       panes:
         - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera.launch
-        - waitForRos; rostopic hz /tag_detections_image

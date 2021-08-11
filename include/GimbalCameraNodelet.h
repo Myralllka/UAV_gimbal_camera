@@ -40,6 +40,7 @@ namespace gimbal_camera {
     private:
         /* flags */
         bool m_recv_camera_info = false;
+        bool m_centering_flag = false;
         /* ros parameters */
         sensor_msgs::CameraInfo m_camera_info;
 
@@ -56,6 +57,7 @@ namespace gimbal_camera {
 
         size_t m_missed_images = 0;
         std::mutex m_movement_mutex;
+        std::mutex m_centering_mutex;
         // | --------------------- MRS transformer -------------------- |
         mrs_lib::Transformer m_transformer;
         // | ---------------------- msg callbacks --------------------- |
@@ -70,7 +72,8 @@ namespace gimbal_camera {
 
         // | ----------------------- publishers ----------------------- |
 
-        ros::Publisher m_pub_transform2gimbal;
+        ros::Publisher m_pub_transform2gimbal_pry;
+        ros::Publisher m_pub_transform2gimbal_quat;
 
         // | ----------------------- subscribers ---------------------- |
 
@@ -83,7 +86,7 @@ namespace gimbal_camera {
 
         void follow_apriltag_incremental(const ros::TimerEvent &ev);
 
-        void follow_apriltag_PID(const ros::TimerEvent &ev);
+        void follow_apriltag_from_two_vectors(const ros::TimerEvent &ev);
 
         void center_camera(const ros::TimerEvent &ev);
 
