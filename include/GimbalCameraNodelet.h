@@ -17,6 +17,8 @@
 #include <mrs_lib/transformer.h>
 #include <mrs_msgs/GimbalPRY.h>
 
+#include <tf2_ros/transform_broadcaster.h>
+#include <nav_msgs/Odometry.h>
 
 #include <pluginlib/class_list_macros.h>
 
@@ -40,7 +42,6 @@ namespace gimbal_camera {
     private:
         /* flags */
         bool m_recv_camera_info = false;
-        bool m_centering_flag = false;
         /* ros parameters */
         sensor_msgs::CameraInfo m_camera_info;
 
@@ -50,27 +51,26 @@ namespace gimbal_camera {
         const float m_max_angle{0.28};
         const float m_time_before_centering{1};
 
-        const float m_max_x_error{0.01};
-        const float m_max_y_error{0.01};
+        const float m_max_x_error{0.005};
+        const float m_max_y_error{0.005};
         ros::Timer m_timer_following;
         ros::Timer m_timer_centering;
 
-        size_t m_missed_images = 0;
         std::mutex m_movement_mutex;
-        std::mutex m_centering_mutex;
         // | --------------------- MRS transformer -------------------- |
         mrs_lib::Transformer m_transformer;
+
         // | ---------------------- msg callbacks --------------------- |
 
         void callback_camera_info(const sensor_msgs::CameraInfo::ConstPtr &msg);
 
-        void callback_missing_images(const rosgraph_msgs::Log::ConstPtr &msg);
         // | --------------------- timer callbacks -------------------- |
 
         // | --------- variables, related to message checking --------- |
 
 
         // | ----------------------- publishers ----------------------- |
+        tf2_ros::TransformBroadcaster m_pub_transform;
 
         ros::Publisher m_pub_transform2gimbal_pry;
         ros::Publisher m_pub_transform2gimbal_quat;
@@ -78,15 +78,12 @@ namespace gimbal_camera {
         // | ----------------------- subscribers ---------------------- |
 
         ros::Subscriber m_sub_gimbal_camera_info;
-        ros::Subscriber m_sub_rosout;
 //        ros::Subscriber m_sub_gimbal_;
         // | --------------------- other functions -------------------- |
 
-        void follow_apriltag_using_z_coordinate(const ros::TimerEvent &ev);
-
         void follow_apriltag_incremental(const ros::TimerEvent &ev);
 
-        void follow_apriltag_from_two_vectors(const ros::TimerEvent &ev);
+        void follow_apriltag_from_two_vectors();
 
         void center_camera(const ros::TimerEvent &ev);
 
