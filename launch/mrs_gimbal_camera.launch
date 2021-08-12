@@ -32,15 +32,13 @@
 
             <!-- Parameters loaded from launch file -->
             <param name="gui" type="bool" value="$(arg gui)"/>
-
             <param name="UAV_NAME" type="string" value="$(arg UAV_NAME)"/>
-
             <!-- ROS parameters config file -->
-            <rosparam file="$(find mrs_gimbal_camera)/config/default.yaml"/>
-            <rosparam file="$(find mrs_gimbal_camera)/config/$(arg RUN_TYPE).yaml"/>
+            <rosparam file="$(find mrs_gimbal_camera)/config/parameters.yaml"/>
 
             <!-- Subscribers (note that the topic names will also be remapped using the namespace as a prefix) -->
-
+            <remap from="~cmd_pry" to="/uav1/gimbal_driver/cmd_pry"/>
+            <remap from="~cmd_quat" to="/uav1/gimbal_driver/cmd_orientation" />
             <!-- Publishers (note that the topic names will also be remapped using the namespace as a prefix) -->
 
         </node>
