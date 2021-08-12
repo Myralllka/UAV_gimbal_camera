@@ -84,6 +84,7 @@ namespace gimbal_camera {
             msg_quat->quaternion.y = orientation.y();
             msg_quat->quaternion.z = orientation.z();
             msg_quat->quaternion.w = orientation.w();
+
             m_pub_transform2gimbal_quat.publish(msg_quat);
             ROS_INFO_THROTTLE(1.0, "[GimbalCamera]: msg sent");
         } else {
