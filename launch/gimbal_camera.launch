@@ -33,6 +33,11 @@
             <!-- Parameters loaded from launch file -->
             <param name="gui" type="bool" value="$(arg gui)"/>
             <param name="UAV_NAME" type="string" value="$(arg UAV_NAME)"/>
+            <param name="camera_info" type="string" value="/camera/camera_info"/>
+            <param name="tag_detections" type="string" value="/tag_detections" />
+            <param name="camera_tf_name" type="string" value="camera" />
+            <param name="bundle_tf_name" type="string" value="mbundle" />
+            
             <!-- ROS parameters config file -->
             <rosparam file="$(find mrs_gimbal_camera)/config/parameters.yaml"/>
 

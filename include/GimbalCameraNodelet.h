@@ -49,7 +49,11 @@ namespace gimbal_camera {
         float m_time_before_centering;
         float m_max_x_error;
         float m_max_y_error;
+        std::string m_tag_detection_n;
+        std::string m_camera_info_n;
         std::string m_uav_name;
+        std::string m_bundle_n;
+        std::string m_camera_n;
 
         ros::Timer m_timer_centering;
         sensor_msgs::CameraInfo m_camera_info;

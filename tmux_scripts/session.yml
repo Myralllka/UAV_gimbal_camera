@@ -13,7 +13,7 @@ windows:
   - additional:
       layout: tiled
       panes:
-        - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera_topictools.launch
+        - waitForRos; roslaunch mrs_gimbal_camera camera_to_apriltag_binding.launch
   - rviz:
       layout: tiled
       panes:
@@ -21,4 +21,4 @@ windows:
   - apriltag_detection:
       layout: tiled
       panes:
-        - waitForRos; roslaunch mrs_gimbal_camera mrs_gimbal_camera.launch
+        - waitForRos; roslaunch mrs_gimbal_camera gimbal_camera.launch

@@ -20,6 +20,11 @@ namespace gimbal_camera {
         pl.loadParam("time_before_centering", m_time_before_centering);
         pl.loadParam("x_deadband", m_max_x_error);
         pl.loadParam("y_deadband", m_max_y_error);
+        pl.loadParam("camera_info", m_camera_info_n);
+        pl.loadParam("tag_detections", m_tag_detection_n);
+        pl.loadParam("", m_tag_detection_n);
+        pl.loadParam("camera_tf_name", m_camera_n);
+        pl.loadParam("camera_tf_name", m_bundle_n);
 
         if (not pl.loadedSuccessfully()) {
             ROS_ERROR("[GimbalCameraNodelet]: Some compulsory parameters could not be loaded! Ending.");
@@ -40,11 +45,11 @@ namespace gimbal_camera {
 
         m_pub_transform2gimbal_quat = nh.advertise<geometry_msgs::QuaternionStamped>("cmd_quat", 1);
 
-        m_sub_tag_detection = nh.subscribe("/tag_detections", 8,
+        m_sub_tag_detection = nh.subscribe(m_tag_detection_n, 8,
                                            &GimbalCameraNodelet::m_cbk_tag_detection,
                                            this);
 
-        m_sub_camera_info = nh.subscribe("/camera/camera_info", 8,
+        m_sub_camera_info = nh.subscribe(m_camera_info_n, 8,
                                          &GimbalCameraNodelet::m_cbk_camera_info,
                                          this);
         ROS_INFO_ONCE("[GimbalCameraNodelet]: Nodelet initialized");
@@ -96,10 +101,10 @@ namespace gimbal_camera {
     void GimbalCameraNodelet::center_camera([[maybe_unused]] const ros::TimerEvent &ev) {
         if (not m_recv_camera_info) return;
 
-        const auto tf_tag_cam = m_transformer.getTransform("mbundle", "camera", ros::Time::now());
+        const auto tf_tag_cam = m_transformer.getTransform(m_bundle_n, m_camera_n,  ros::Time::now());
         if (!tf_tag_cam.has_value() or (ros::Time::now().sec - tf_tag_cam->stamp().sec > m_time_before_centering)) {
             ROS_ERROR_THROTTLE(1.0,
-                    "[GimbalCameraNodelet]: Could not transform commanded orientation from frame mbundle to camera, ignoring.");
+                    "[GimbalCameraNodelet]: Could not transform commanded orientation from frame %s to %s, ignoring.", m_bundle_n.c_str(), m_camera_n.c_str());
             auto m = boost::make_shared<mrs_msgs::GimbalPRY>();
             m->yaw = 0;
             m->pitch = 0;
