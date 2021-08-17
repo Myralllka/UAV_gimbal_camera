@@ -22,9 +22,8 @@ namespace gimbal_camera {
         pl.loadParam("y_deadband", m_max_y_error);
         pl.loadParam("camera_info", m_camera_info_n);
         pl.loadParam("tag_detections", m_tag_detection_n);
-        pl.loadParam("", m_tag_detection_n);
+        pl.loadParam("bundle_tf_name", m_bundle_n);
         pl.loadParam("camera_tf_name", m_camera_n);
-        pl.loadParam("camera_tf_name", m_bundle_n);
 
         if (not pl.loadedSuccessfully()) {
             ROS_ERROR("[GimbalCameraNodelet]: Some compulsory parameters could not be loaded! Ending.");
